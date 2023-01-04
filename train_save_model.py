@@ -68,16 +68,6 @@ class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
 #   tf.keras.layers.Dense(10, name='Dense')
 # ])
 
-## second attempt (best!)
-classifier = tf.keras.Sequential([
-  tf.keras.layers.Conv2D(32, (3,3), activation = 'relu', input_shape = (28,28,1)),
-  tf.keras.layers.MaxPooling2D(2,2),
-  tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
-  tf.keras.layers.Flatten(),
-  tf.keras.layers.Dense(64, activation = 'relu'),
-  tf.keras.layers.Dense(10, activation = 'softmax')
-])
-
 # ## third attempt
 # classifier = tf.keras.Sequential([
 #   tf.keras.layers.Conv2D(6, (5,5), activation = 'relu', input_shape = (28,28,1)),
@@ -90,13 +80,27 @@ classifier = tf.keras.Sequential([
 #   tf.keras.layers.Dense(10, activation = 'softmax')
 # ])
 
+## second attempt (best!)
+### added mirrored strategy
+strategy = tf.distribute.MirroredStrategy()
 
-classifier.summary()
+with strategy.scope():
+  classifier = tf.keras.Sequential([
+    tf.keras.layers.Conv2D(32, (3,3), activation = 'relu', input_shape = (28,28,1)),
+    tf.keras.layers.MaxPooling2D(2,2),
+    tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(64, activation = 'relu'),
+    tf.keras.layers.Dense(10, activation = 'softmax')
+  ])
 
 
-classifier.compile(optimizer='adam', 
-              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-              metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
+  classifier.summary()
+
+
+  classifier.compile(optimizer='adam', 
+                loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
 
 
 ############################################################################################
